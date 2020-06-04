@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .ad_img{
+            text-align: center;
+            margin-top:15vh;
+        }
+        .form{
+            text-align: center;
+            margin-top:5vh;
+        }
+        input,button{
+            -webkit-appearance:none;
+            outline: none;
+        }
+        input{
+            width:80%;
+            font-size: 4vw;;
+            line-height: 12vw;
+            text-indent: 12px;
+            border: 1px solid #999;
+            box-sizing: border-box;
+        }
+        #btn{
+            width:80%;
+            padding:0 10vw;
+            line-height: 16vw;
+            border-radius: 2px;
+            border: none;
+            background-color: #1890ff;
+            color: #fff;
+            font-size:6vw;
+            margin-top:5vw;
+        }
+        canvas{
+            width:80%;
+        }
+    </style>
+</head>
+<body>
+    <img id="qrCodeIco" style="display: none;border:2px solid #ddd" src="img/logo.png" alt="">
+    <div class="ad_img" id="erweima">
+        
+    </div>
+    <div class="form">
+        <label for="userId">
+            <input name="userId" type="text" placeholder="请输入身份证后6位" id="userId">
+        </label>
+        <div class="btn">
+            <button id="btn">生成二维码</button>
+        </div>
+        
+    </div>
+    
+    <script src="js/jquery.min.js"></script>
+    <script src="js/qrcode.js" type="text/javascript" ></script>
+    <script src="js/jquery.qrcode.js" type="text/javascript" ></script>
+    <script>
+        var commonUrl="http://10.1.70.26:9080/api"
+        $(function(){
+            query("000000");
+            $("#btn,#erweima").on('click',function(){
+                var reg=/\d{6}/;
+                var reg_trim=/(^\s*)|($\s*)/g;
+                var val=$("#userId").val().replace(reg_trim,'');
+                console.log("val",val)
+                if(!reg.test(val)){
+                        alert("请输入长度为6的数字！")
+                        return;
+                }
+                query(val);
+            })
+        })
+        function query(val){
+            var data={
+                userId:val
+            }
+            $.ajax({
+					type: "post",
+					dataType: "json", // 数据格式:JSON
+					async: false,
+					contentType:"application/json",
+					url: commonUrl + "/userQRCode",
+					data: JSON.stringify(data),
+					success: function success(data) {
+                        console.log(data)
+                        if(data.code==200){
+                            var text=data.data.qrcode;
+                            makeQrcode(text)
+                        }
+					},
+					error: function error(XMLHttpRequest, textStatus, errorThrown) {
+						console.log("err:",XMLHttpRequest)
+					}
+				});
+        }
+        function makeQrcode(value){
+            $('#erweima').empty().qrcode({
+                text:value,
+                width: 200,
+                height: 200,
+                colorDark : "#f57",
+                colorLight : "#f67",
+                // correctLevel : QRCode.CorrectLevel.H
+            });
+            $("#erweima canvas")[0].getContext('2d').drawImage($("#qrCodeIco")[0],70,70, 60, 60);
+            // 100, 100, 65, 65分别是X位置(一般取二维码宽*0.4)，Y位置(一般取二维码高*0.4)，小图片宽度，小图片高度
+        }
+    </script>   
+</body>
+</html>
