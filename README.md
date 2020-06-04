@@ -1,0 +1,2 @@
+# generateQrcode
+generate a qrcode 
